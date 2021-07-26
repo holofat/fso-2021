@@ -105,8 +105,7 @@ const App = () => {
     if(person){
       if(window.confirm(`${personObject.name} is already added to phonebook, replace the old number with a new one? `)){
         contact.update(person.id, personObject)
-          .then(() => {
-            setPersons(persons.map(person => {
+        setPersons(persons.map(person => {
               if(person.name === personObject.name) {
                 const number = personObject.number
                 return {...person, number}
@@ -114,35 +113,41 @@ const App = () => {
                 return person
               }
             }))
-          })
-          .catch(err => {
-            setMessage(`Information of ${person.name} has already been removed from server`)
-            setError(true)
-            setTimeout(() => {
-              setMessage(null)
-              setError(false)
-            }, 2000)
-          })
       }
     } else{
       setPersons(persons.concat(personObject))
-      contact.create(personObject).then(res => console.log(res))
+      contact.create(personObject)
+        .then(res => {
+          console.log(res)
+          setNewName('')
 
-      setNewName('')
+          setNewNumber('')
 
-      setNewNumber('')
+          setMessage(`${personObject.name} is added`)
 
-      setMessage(`${personObject.name} is added`)
+          setTimeout(() => {
+            setMessage(null)
+          }, 2000)
+        })
+        .catch(err => {
+          const msg = err.response.data
+          
+          setError(true)
+          setMessage(String(msg["error"]))
 
-      setTimeout(() => {
-        setMessage(null)
-      }, 2000)
+          setTimeout(() => {
+            setMessage(null)
+            setError(false)
+          }, 3000)          
+
+        })
     }
   }
 
   const delCon = (name, id) => {
     if(window.confirm(`Delete ${name}`)){
       contact.deleteContact(id)
+      console.log(id)
       setPersons(persons.filter((person) => person.name !== name ))
     }
   }
