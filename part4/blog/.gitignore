@@ -76,3 +76,4 @@ typings/
 .fusebox/
 
 rest.http
+.eslintrc.json
