@@ -7,20 +7,24 @@ const logger = require('./utils/logger')
 const middleware = require('./utils/middleware')
 const config = require('./utils/config')
 
-logger.info('connecting to', config.MONGODB_URI)
-
 const mongoUri = config.MONGODB_URI
 
-mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
-  .then(() => logger.info('MongoDB is connected'))
-  .catch(err => logger.error(err.message))
-
+const mongoConnect = async () => {
+  try {
+    await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+    logger.info('MongoDB is connected')
+  } catch (e) {
+    logger.error(e.message)
+  }
+}
+mongoConnect()
+logger.info('connecting to', config.MONGODB_URI)
 app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
 app.use(middleware.reqLogger)
 
-app.use('/api/notes', router)
+app.use('/api/blogs/', router)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
