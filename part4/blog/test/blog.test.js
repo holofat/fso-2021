@@ -3,14 +3,28 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('../utils/list_helper')
 const api = supertest(app)
-const Blog = require('../models/blog')
+const Blog = require('../models/blog.model')
+const User = require('../models/user.model')
 
 beforeEach(async () => {
+  await User.deleteMany({})
   await Blog.deleteMany({})
   for (let i = 0; i < helper.initialBlog.length; i++) {
     const blogObject = new Blog(helper.initialBlog[i])
     await blogObject.save()
   }
+})
+test('invalid users are not created', async () => {
+  const userObject = {
+    username: 'fe',
+    name: 'asdw',
+    password: '3rwe'
+  }
+
+  await api
+    .post('/api/users')
+    .send(userObject)
+    .expect(200)
 })
 
 describe('when there is initially some blogs saved', () => {
