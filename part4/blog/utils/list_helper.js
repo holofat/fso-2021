@@ -1,5 +1,5 @@
 /* eslint-disable array-callback-return */
-const Blog = require('../models/blog')
+const Blog = require('../models/blog.model')
 
 const initialBlog = [
   {
