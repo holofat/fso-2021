@@ -14,9 +14,12 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const body = req.body
 
-  const user = await User.findById(body.userId)
+  if (!req.token || !req.decodedToken) {
+    return res.status(401).json({ error: 'token missing or invalid' })
+  }
 
   try {
+    const user = await User.findById(req.decodedToken.id)
     const blog = new Blog({
       title: body.title,
       author: body.author,
@@ -27,7 +30,7 @@ router.post('/', async (req, res) => {
     const savedBlog = await blog.save()
     user.blogs = user.blogs.concat(savedBlog._id)
     await user.save()
-    res.json(savedBlog)
+    res.json(savedBlog.toJSON()).status(200)
   } catch (e) {
     res.status(400).json(e)
   }
@@ -49,9 +52,16 @@ router.put('/:id', async (req, res) => {
 })
 
 router.delete('/:id', async (req, res) => {
+  const user = req.user
   try {
-    await Blog.findByIdAndDelete(req.params.id)
-    res.status(204).end()
+    const blog = await Blog.findById(req.params.id)
+    if (blog.user.toString() === user.toString()) {
+      await Blog.findByIdAndDelete(req.params.id)
+      console.log('a blog is deleted')
+      res.status(200).end()
+    } else {
+      res.json({ error: 'only user who create this blog can delete this' })
+    }
   } catch (e) {
     res.json(e)
   }
