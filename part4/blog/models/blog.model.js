@@ -12,6 +12,7 @@ const blogSchema = new mongoose.Schema({
     required: true,
     default: undefined
   },
+  user: String,
   likes: {
     type: Number,
     default: 0
