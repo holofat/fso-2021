@@ -9,9 +9,6 @@ const User = require('../models/user.model')
 require('dotenv').config()
 
 let token
-let userForToken = {
-  id: ''
-}
 
 beforeEach(async () => {
   await User.deleteMany({})
@@ -22,8 +19,9 @@ beforeEach(async () => {
     name: 'test name',
     password: 'test'
   }).save()
+  this.userid = testUser.id
 
-  userForToken = {
+  const userForToken = {
     username: testUser.username,
     id: testUser.id
   }
@@ -31,7 +29,8 @@ beforeEach(async () => {
   token = jwt.sign(userForToken, process.env.SECRET)
 
   for (let i = 0; i < helper.initialBlog.length; i++) {
-    const blogObject = new Blog(helper.initialBlog[i])
+    const newBlog = Object.assign(helper.initialBlog[i], { user: this.userid })
+    const blogObject = new Blog(newBlog)
     await blogObject.save()
   }
 })
@@ -48,6 +47,7 @@ test('invalid users are not created', async () => {
     .expect(200)
 })
 
+// There are some blogs in DB
 describe('when there is initially some blogs saved', () => {
   test('all blogs are returned', async () => {
     const response = await api.get('/api/blogs')
@@ -61,6 +61,7 @@ describe('when there is initially some blogs saved', () => {
   })
 })
 
+// Addition of a new blog
 describe('addition of a new blog', () => {
   test('if a token is not provided will given 401', async () => {
     const blogObject = {
@@ -88,8 +89,8 @@ describe('addition of a new blog', () => {
       .set('Authorization', `bearer ${token}`)
       .expect(200)
 
-    // const blogsAtEnd = await helper.blogsInDB()
-    // expect(blogsAtEnd).toHaveLength(helper.initialBlog.length + 1)
+    const blogsAtEnd = await helper.blogsInDB()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlog.length + 1)
   })
 
   test('blogs without title and url, will result 400 Bad Request', async () => {
@@ -105,31 +106,14 @@ describe('addition of a new blog', () => {
   })
 })
 
+// Deletion of a blog
 describe('deletion of a blog', () => {
-  let userid
-  beforeEach(async () => {
-    await Blog.deleteMany({})
-    await User.deleteMany({})
-    const testUser = await new User({
-      username: 'test',
-      name: 'test name',
-      password: 'test'
-    }).save()
-
-    for (let i = 0; i < helper.initialBlog.length; i++) {
-      const newBlog = Object.assign(helper.initialBlog[i], { user: testUser.id })
-      const blogObject = new Blog(newBlog)
-      await blogObject.save()
-    }
-
-    userid = testUser.id
-  })
   test('success with status 204 if id is valid', async () => {
     const blogsAtStart = await helper.blogsInDB()
     const blogToDelete = blogsAtStart[0]
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
-      .send({ userid: userid })
+      .send({ userid: this.userid })
       .expect(200)
 
     const blogsAtEnd = await helper.blogsInDB()
@@ -140,7 +124,19 @@ describe('deletion of a blog', () => {
 
     expect(contents).not.toContain(blogToDelete.id)
   })
+
+  test('a blog cant be delete because you are not who create it', async () => {
+    const blogsAtStart = await helper.blogsInDB()
+    const blogToDelete = blogsAtStart[0]
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .send({ userid: '12' })
+      .expect(400)
+  })
 })
+
+// Updating a blog
 
 afterAll(() => {
   mongoose.connection.close()

@@ -38,14 +38,23 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   const body = req.body
+  const user = req.user
 
   const blogObject = {
-    likes: body.likes
+    title: body.title,
+    url: body.url,
+    author: body.author
   }
 
   try {
-    await Blog.findByIdAndUpdate(req.params.id, blogObject)
-    res.status(200).json('Success updating').end()
+    const blog = await Blog.findById(req.params.id)
+    if (blog.user.toString() === user.toString()) {
+      await Blog.findByIdAndUpdate(req.params.id, blogObject)
+      console.log('a blog is updated')
+      res.status(200).end()
+    } else {
+      res.json({ error: 'only user who create this blog can update this' })
+    }
   } catch (e) {
     res.json(e)
   }
@@ -57,13 +66,13 @@ router.delete('/:id', async (req, res) => {
     const blog = await Blog.findById(req.params.id)
     if (blog.user.toString() === user.toString()) {
       await Blog.findByIdAndDelete(req.params.id)
-      console.log('a blog is deleted')
-      res.status(200).end()
+      res.status(200).json('a blog is deleted').end()
     } else {
-      res.json({ error: 'only user who create this blog can delete this' })
+      res.status(400).json({ error: 'only user who create this blog can delete this' })
     }
   } catch (e) {
-    res.json(e)
+    console.log('error')
+    res.status(400).json(e)
   }
 })
 
