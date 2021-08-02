@@ -6,8 +6,9 @@ router.post('/', async (req, res) => {
   const body = req.body
 
   const saltRounds = 10
+
   try {
-    if (body.password > 3) {
+    if (body.password.length > 3) {
       const passwordHash = await bcrypt.hash(body.password, saltRounds)
 
       const user = new User({
@@ -32,8 +33,8 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const users = await User.find().populate('blogs')
-    res.send(JSON.stringify(users))
+    const users = await User.find({}).populate('blogs')
+    res.json(users)
   } catch (e) {
     res.json(e)
   }
