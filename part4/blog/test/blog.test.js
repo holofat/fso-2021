@@ -3,12 +3,33 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('../utils/list_helper')
 const api = supertest(app)
+const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog.model')
 const User = require('../models/user.model')
+require('dotenv').config()
+
+let token
+let userForToken = {
+  id: ''
+}
 
 beforeEach(async () => {
   await User.deleteMany({})
   await Blog.deleteMany({})
+
+  const testUser = await new User({
+    username: 'test',
+    name: 'test name',
+    password: 'test'
+  }).save()
+
+  userForToken = {
+    username: testUser.username,
+    id: testUser.id
+  }
+
+  token = jwt.sign(userForToken, process.env.SECRET)
+
   for (let i = 0; i < helper.initialBlog.length; i++) {
     const blogObject = new Blog(helper.initialBlog[i])
     await blogObject.save()
@@ -40,26 +61,8 @@ describe('when there is initially some blogs saved', () => {
   })
 })
 
-describe('addition of a new note', () => {
-  test('a blog is succesfully created', async () => {
-    const blogObject = {
-      title: 'Test Blog',
-      author: 'Test Author',
-      url: 'nothing',
-      likes: 4
-    }
-
-    await api
-      .post('/api/blogs')
-      .send(blogObject)
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
-
-    const blogsAtEnd = await helper.blogsInDB()
-    expect(blogsAtEnd).toHaveLength(helper.initialBlog.length + 1)
-  })
-
-  test('blogs without likes property, will be given default value of 0', async () => {
+describe('addition of a new blog', () => {
+  test('if a token is not provided will given 401', async () => {
     const blogObject = {
       title: 'Test Blog',
       author: 'Test Author',
@@ -69,8 +72,24 @@ describe('addition of a new note', () => {
     await api
       .post('/api/blogs')
       .send(blogObject)
+      .expect(401)
+  })
+
+  test('a blog is created', async () => {
+    const blogObject = {
+      title: 'Test Blog',
+      author: 'Test Author',
+      url: 'nothing'
+    }
+
+    await api
+      .post('/api/blogs/')
+      .send(blogObject)
+      .set('Authorization', `bearer ${token}`)
       .expect(200)
-      .expect('Content-Type', /application\/json/)
+
+    // const blogsAtEnd = await helper.blogsInDB()
+    // expect(blogsAtEnd).toHaveLength(helper.initialBlog.length + 1)
   })
 
   test('blogs without title and url, will result 400 Bad Request', async () => {
@@ -80,19 +99,38 @@ describe('addition of a new note', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1meXoiLCJpZCI6IjYxMDY5ZGIwZGI0NTYwMjAwODMxOWQ3MyIsImlhdCI6MTYyNzg2MDM5NX0.kMcW9631y2i5gvj0-hBi2zkYa6BXmLHEhN2onnIpmLY')
       .send(blogObject)
       .expect(400)
   })
 })
 
 describe('deletion of a blog', () => {
+  let userid
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await User.deleteMany({})
+    const testUser = await new User({
+      username: 'test',
+      name: 'test name',
+      password: 'test'
+    }).save()
+
+    for (let i = 0; i < helper.initialBlog.length; i++) {
+      const newBlog = Object.assign(helper.initialBlog[i], { user: testUser.id })
+      const blogObject = new Blog(newBlog)
+      await blogObject.save()
+    }
+
+    userid = testUser.id
+  })
   test('success with status 204 if id is valid', async () => {
     const blogsAtStart = await helper.blogsInDB()
     const blogToDelete = blogsAtStart[0]
-
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
-      .expect(204)
+      .send({ userid: userid })
+      .expect(200)
 
     const blogsAtEnd = await helper.blogsInDB()
 
@@ -101,20 +139,6 @@ describe('deletion of a blog', () => {
     const contents = blogsAtEnd.map(blog => blog.id)
 
     expect(contents).not.toContain(blogToDelete.id)
-  })
-})
-
-describe('updating a blog', () => {
-  test('success with status 204 if id is valid', async () => {
-    const blogsAtStart = await helper.blogsInDB()
-    const blogToUpdate = blogsAtStart[0]
-    const updateLikes = {
-      likes: 123
-    }
-    await api
-      .put(`/api/blogs/${blogToUpdate.id}`)
-      .send(updateLikes)
-      .expect(200)
   })
 })
 
