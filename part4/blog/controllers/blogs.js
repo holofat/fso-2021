@@ -60,6 +60,27 @@ router.put('/:id', async (req, res) => {
   }
 })
 
+router.put('/likes/:id', async (req, res) => {
+  const body = req.body
+  const user = req.user
+
+  try {
+    const blog = await Blog.findById(req.params.id)
+    const blogObject = {
+      title: body.title,
+      url: body.url,
+      author: body.author,
+      likes: blog.likes + 1,
+      user: user
+    }
+    await Blog.findByIdAndUpdate(req.params.id, blogObject)
+    console.log(`a like is given to ${body.title}`)
+    res.status(200).end()
+  } catch (e) {
+    res.json(e)
+  }
+})
+
 router.delete('/:id', async (req, res) => {
   const user = req.user
   try {
