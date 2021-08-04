@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import _ from 'lodash'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
@@ -23,7 +24,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    ) 
   }, [])
 
   useEffect(() => {
@@ -34,6 +35,8 @@ const App = () => {
       setNewToken(user.token)
     }
   }, [])
+
+  const blogsSortByLikes = _.sortBy(blogs, "likes").reverse()
  
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -94,7 +97,7 @@ const App = () => {
     <div>
       <h1>Log in to Blog</h1>
       <Notification message={message} error={error}/>
-      <LoginForm username={username} password={password} handleUsername={({target}) => setUsername(target.value)} handlePassword={({target}) => setPassword(target.value)} handleLogin={handleLogin} />
+      <LoginForm  password={password} handleUsername={({target}) => setUsername(target.value)} handlePassword={({target}) => setPassword(target.value)} handleLogin={handleLogin} />
     </div>
   )
   
@@ -116,8 +119,8 @@ const App = () => {
             handleCreateBlog={handleCreate}
           />
         </Togglable>
-        {blogs.map((blog, id) => (
-          <Blog key={id} blog={blog}/>
+        {blogsSortByLikes.map((blog, id) => (
+          <Blog key={id} blog={blog} user={user.id}/>
         ))}
       </div>
     )
