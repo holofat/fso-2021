@@ -12,7 +12,8 @@ const Blog = ({blog, user}) => {
     setVisible(!visible)
   }
 
-  const addLike = async () => {
+  const addLike = async (e) => {
+    e.preventDefault()
     const blogObject = {
       title: blog.title,
       url: blog.url,
@@ -52,13 +53,13 @@ const Blog = ({blog, user}) => {
     marginBottom: 5
   }
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} className='blog'>
       <b>{blog.title}</b> {blog.author} 
-      <button onClick={addLike}>Like</button>
+      <button className="likeButton" type="button" onClick={addLike}>Like Button</button>
       <button style={hideWhenVisible} onClick={toggleVisibility}>view</button>
       <button style={showWhenVisible} onClick={toggleVisibility}>hide</button>
-      <div style={showWhenVisible}>
-        Likes: {countLike}<br/>
+      <div className="togglableContent" style={showWhenVisible}>
+        <p className="totalLikes">Likes: {countLike}</p>
         {blog.url}<br/>
         {blog.user}<br/>
         {blog.user === user && deleteButton()}
