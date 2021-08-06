@@ -1,10 +1,12 @@
 const Blog = require('../models/blog.model')
 const User = require('../models/user.model')
 const router = require('express').Router()
+const _ = require('lodash')
 
 router.get('/', async (req, res) => {
   try {
-    const blogs = await Blog.find({})
+    let blogs = await Blog.find({})
+    blogs = _.sortBy(blogs, 'likes').reverse()
     res.json(blogs)
   } catch (e) {
     res.json(e)
@@ -62,16 +64,14 @@ router.put('/:id', async (req, res) => {
 
 router.put('/likes/:id', async (req, res) => {
   const body = req.body
-  const user = req.user
 
   try {
-    const blog = await Blog.findById(req.params.id)
     const blogObject = {
       title: body.title,
       url: body.url,
       author: body.author,
-      likes: blog.likes + 1,
-      user: user
+      likes: body.likes,
+      user: body.user
     }
     await Blog.findByIdAndUpdate(req.params.id, blogObject)
     console.log(`a like is given to ${body.title}`)
@@ -83,17 +83,29 @@ router.put('/likes/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   const user = req.user
+  console.log(user)
   try {
     const blog = await Blog.findById(req.params.id)
     if (blog.user.toString() === user.toString()) {
       await Blog.findByIdAndDelete(req.params.id)
-      res.status(200).json('a blog is deleted').end()
+      res.status(200)
+      console.log(user)
     } else {
       res.status(400).json({ error: 'only user who create this blog can delete this' })
     }
   } catch (e) {
     console.log('error')
     res.status(400).json(e)
+  }
+})
+
+router.post('/reset', async (req, res) => {
+  try {
+    const reset = await Blog.deleteMany({})
+    console.log(reset)
+    res.json('Success Reset Blog Database')
+  } catch (e) {
+    console.log(e)
   }
 })
 
