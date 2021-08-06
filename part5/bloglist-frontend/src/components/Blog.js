@@ -1,7 +1,7 @@
 import blogService from '../services/blogs'
 import React, { useState } from 'react'
 
-const Blog = ({blog, user}) => {
+const Blog = ({blog, handleDelete, user}) => {
   const [visible, setVisible] = useState(false)
   const [countLike, setCountLike] = useState(blog.likes)
 
@@ -19,7 +19,8 @@ const Blog = ({blog, user}) => {
       url: blog.url,
       author: blog.author,
       user:blog.user,
-      id:blog.id
+      id:blog.id,
+      likes: countLike+1
     }
     try {
       await blogService.addLike(blogObject)
@@ -29,20 +30,17 @@ const Blog = ({blog, user}) => {
     }
 
   }
-  
-  const handleDelete = async () => {
-    if(window.confirm(`Do you want to remove blog ${blog.title} by ${blog.author}?`)) {
-      await blogService.deleteBlog(blog.id, blog.user)
-      console.log('a blog is deleted')
-    }
-  }
 
   const deleteButton = () => {
-    return (
-      <div>
-        <button onClick={handleDelete}>delete</button>
-      </div>
-    )
+    if (blog.user === user){
+      return (
+        <div>
+          <button id="delete-button" type="button" onClick={handleDelete}>delete</button>
+        </div>
+      )
+    } else {
+      return(<div></div>)
+    }
   }
 
   const blogStyle = {
@@ -54,15 +52,15 @@ const Blog = ({blog, user}) => {
   }
   return (
     <div style={blogStyle} className='blog'>
-      <b>{blog.title}</b> {blog.author} 
-      <button className="likeButton" type="button" onClick={addLike}>Like Button</button>
-      <button style={hideWhenVisible} onClick={toggleVisibility}>view</button>
+      <p id="title"><b>{blog.title}</b> {blog.author} </p>
+      <button id="like-button" className="likeButton" type="button" onClick={addLike}>Like</button>
+      <button id="show-detail" style={hideWhenVisible} onClick={toggleVisibility}>view</button>
       <button style={showWhenVisible} onClick={toggleVisibility}>hide</button>
       <div className="togglableContent" style={showWhenVisible}>
         <p className="totalLikes">Likes: {countLike}</p>
         {blog.url}<br/>
-        {blog.user}<br/>
-        {blog.user === user && deleteButton()}
+        Created by {blog.user}<br/>
+        {deleteButton()}
       </div>
     </div>
   )

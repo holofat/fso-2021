@@ -7,7 +7,7 @@ const BlogForm = ({ title, author, url, handleTitle, handleAuthor, handleURL, ha
       Title: <input id="title" type="text" name={title} onChange={handleTitle}/><br/>
       Author: <input id="author" type="text" name={author} onChange={handleAuthor}/><br/>
       URL: <input id="url" type="text" name={url} onChange={handleURL} /><br/>
-      <button type="submit">create</button>
+      <button id="create-blog" type="submit">create</button>
     </form>
   </div>
 )

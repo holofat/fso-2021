@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import _ from 'lodash'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
@@ -23,7 +22,7 @@ const App = () => {
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs( blogs )
+      setBlogs(blogs)
     ) 
   }, [])
 
@@ -32,11 +31,9 @@ const App = () => {
     if (loggedUser) {
       const user = JSON.parse(loggedUser)
       setUser(user)
-      setNewToken(user.token)
+      setNewToken(user['token'])
     }
   }, [])
-
-  const blogsSortByLikes = _.sortBy(blogs, "likes").reverse()
  
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -48,11 +45,11 @@ const App = () => {
       window.localStorage.setItem(
         'loggedBlogUser', JSON.stringify(user)
       )
-      setNewToken(user.token)
+      setNewToken(user['token'])
       setMessage(`Hello, ${user.username}`)
       setTimeout(() => {
         setMessage(null)
-      }, 2000)
+      }, 5000)
       setUser(user)
       setUsername('')
       setPassword('')
@@ -62,7 +59,7 @@ const App = () => {
       setTimeout(() => {
         setMessage(null)
         setError(false)
-      }, 2000)
+      }, 5000)
       console.log('Wrong Credentials')
     }
   }
@@ -72,16 +69,19 @@ const App = () => {
     const newBlog = {
       title: newTitle,
       author: newAuthor,
-      url: newUrl
+      url: newUrl,
+      user: user.id,
+      likes:0
     }
-    console.log()
+
     try {
       await blogService.create(newBlog, newToken)
-      setBlogs(blogs.concat(newBlog))
+      const blogList = await blogService.getAll()
+      setBlogs(blogList)
       setMessage(`${newBlog.title} by ${newBlog.author} is added`)
       setTimeout(() => {
         setMessage(null)
-      }, 2000)
+      }, 6000)
     } catch (exception) {
       console.log(exception)
     }
@@ -91,6 +91,26 @@ const App = () => {
     window.localStorage.clear()
     setUser(null)
     setNewToken(null)
+  }
+
+  const handleDelete = async (blog) => {
+    if(window.confirm(`Do you want to remove blog ${blog.title} by ${blog.author}?`)) {
+      try {
+        await blogService.deleteBlog(blog.id, blog.user)
+        setError(true)
+        setMessage(`${blog.title} is deleted`)
+        setTimeout(() => {
+          setMessage(null)
+          setError(false)
+        }, 3000)
+        setBlogs(blogs.filter(aBlog => aBlog.id !== blog.id))
+      } catch (e){
+        console.log(e)
+      }
+      
+    } else {
+      return null
+    }
   }
 
   const loginForm = () => (
@@ -108,7 +128,7 @@ const App = () => {
         <h1>Blogs</h1>
         <Notification message={message} error={error}/>
         <p>
-          {user.username} logged in <button type="submit" onClick={() => handleLogout()} value="logout">logout</button>
+          {user.username} logged in <button id="#logout-button" type="submit" onClick={() => handleLogout()} value="logout">logout</button>
         </p>
         <Togglable buttonLabel='Create A New Blog'>
           <BlogForm 
@@ -119,8 +139,8 @@ const App = () => {
             handleCreateBlog={handleCreate}
           />
         </Togglable>
-        {blogsSortByLikes.map((blog, id) => (
-          <Blog key={id} blog={blog} user={user.id}/>
+        {blogs.map((blog, id) => (
+          <Blog key={id} blog={blog} user={user.id} handleDelete={() => handleDelete(blog)}/>
         ))}
       </div>
     )
