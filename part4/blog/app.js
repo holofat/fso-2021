@@ -16,13 +16,12 @@ const config = require('./utils/config')
 
 // Connecting to MongoDB
 const mongoUri = config.MONGODB_URI
+console.log(mongoUri)
 
-try {
-  mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
-  logger.info('MongoDB is connected')
-} catch (e) {
-  logger.error(e.message)
-}
+mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+  .then(() => console.log('Success'))
+  .catch(e => logger.error(e.message))
+console.log('test')
 
 // Built in Middleware
 logger.info('connecting to', config.MONGODB_URI)
@@ -34,6 +33,11 @@ app.use(middleware.tokenExtractor)
 app.use('/api/blogs/', middleware.userExtractor, blogRouter)
 app.use('/api/users/', userRouter)
 app.use('/api/login/', loginRouter)
+
+if (process.env.NODE_ENV === 'test') {
+  const testingRouter = require('./controllers/test')
+  app.use('/api/testing', testingRouter)
+}
 
 // Error
 app.use(middleware.requestLogger)
