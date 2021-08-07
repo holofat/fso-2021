@@ -145,21 +145,24 @@ describe('Blog app', function() {
 
       cy.get('#title').type('Third')
       cy.get('#create-blog').click()
-      cy.get('#cancel-button').click()
 
     })
 
     it('the blogs are ordered according to likes', function() {
-
-      cy.get('#like-button:first').click()
-      cy.get('#like-button:first').click()
-      cy.get('#like-button:first').click()
-
       cy.reload()
+      cy.get('#like-button').click()
+      cy.get('#like-button').click()
+      cy.get('#like-button').click()
 
-      cy.get('#show-detail:first').click()
+      cy.contains('Create A New Blog').click()
+      cy.get('#title').type('First')
+      cy.get('#create-blog').click()
 
-      cy.get('#title:first').should('contain', 'First')
+      cy.request('GET', 'http://localhost:3003/api/blogs')
+        .should((res) => {
+          expect(res.body[0]).to.have.property('title', 'Third')
+        })
+
     })
   })
 })
