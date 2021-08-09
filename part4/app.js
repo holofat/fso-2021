@@ -16,15 +16,13 @@ const config = require('./utils/config')
 
 // Connecting to MongoDB
 const mongoUri = config.MONGODB_URI
-console.log(mongoUri)
 
 mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
-  .then(() => console.log('Success'))
+  .then(() => logger.info('Connected to MongoDB'))
   .catch(e => logger.error(e.message))
-console.log('test')
 
 // Built in Middleware
-logger.info('connecting to', config.MONGODB_URI)
+logger.info('connecting to', config.DB)
 app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
@@ -36,6 +34,7 @@ app.use('/api/login/', loginRouter)
 
 if (process.env.NODE_ENV === 'test') {
   const testingRouter = require('./controllers/test')
+  console.log(`connecting to ${config.DB_TEST}`)
   app.use('/api/testing', testingRouter)
 }
 

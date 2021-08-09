@@ -5,7 +5,6 @@ const bcrypt = require('bcrypt')
 
 router.post('/', async (req, res) => {
   const body = req.body
-  console.log(body)
 
   try {
     const user = await User.findOne({ username: body.username })

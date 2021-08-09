@@ -52,7 +52,6 @@ router.put('/:id', async (req, res) => {
     const blog = await Blog.findById(req.params.id)
     if (blog.user.toString() === user.toString()) {
       await Blog.findByIdAndUpdate(req.params.id, blogObject)
-      console.log('a blog is updated')
       res.status(200).end()
     } else {
       res.json({ error: 'only user who create this blog can update this' })
@@ -74,7 +73,6 @@ router.put('/likes/:id', async (req, res) => {
       user: body.user
     }
     await Blog.findByIdAndUpdate(req.params.id, blogObject)
-    console.log(`a like is given to ${body.title}`)
     res.status(200).end()
   } catch (e) {
     res.json(e)
@@ -83,26 +81,22 @@ router.put('/likes/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   const user = req.user
-  console.log(user)
   try {
     const blog = await Blog.findById(req.params.id)
     if (blog.user.toString() === user.toString()) {
       await Blog.findByIdAndDelete(req.params.id)
       res.status(200)
-      console.log(user)
     } else {
       res.status(400).json({ error: 'only user who create this blog can delete this' })
     }
   } catch (e) {
-    console.log('error')
     res.status(400).json(e)
   }
 })
 
 router.post('/reset', async (req, res) => {
   try {
-    const reset = await Blog.deleteMany({})
-    console.log(reset)
+    await Blog.deleteMany({})
     res.json('Success Reset Blog Database')
   } catch (e) {
     console.log(e)

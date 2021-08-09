@@ -19,7 +19,6 @@ router.post('/', async (req, res) => {
 
       const savedUser = await user.save()
 
-      console.log('a user is succesfully created')
       res.json(savedUser)
     } else if (body.password === '') {
       res.json({ error: 'Password must be defined' })
