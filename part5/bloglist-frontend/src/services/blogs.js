@@ -16,7 +16,6 @@ const create = async (newBlog, token) => {
   }
   try {
     const response = await axios.post(baseUrl, newBlog, config)
-    console.log('a blog is created')
     return response.data
   } catch (exception) {
     console.log(exception)
@@ -38,7 +37,6 @@ const deleteBlog = (id, user) => {
   }
   try {
     const request = axios.delete(`${baseUrl}/${id}`, data)
-    console.log('a blog is deleted')
     return request.data
   } catch (e) {
     console.log(e)
