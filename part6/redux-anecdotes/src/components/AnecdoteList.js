@@ -3,8 +3,8 @@ import _ from 'lodash'
 import { useSelector, useDispatch } from 'react-redux'
 import { addVote } from '../reducers/anecdoteReducer'
 
-const AnecdoteForm = () => {
-  const anecdotes = useSelector(state => _.reverse(_.sortBy(state, 'votes')))
+const AnecdoteList = () => {
+  const anecdotes = useSelector(state => _.reverse(_.sortBy(state.anecdote, 'votes')))
   const dispatch = useDispatch()
   const vote = (id) => {
     dispatch(addVote(id))
@@ -26,4 +26,4 @@ const AnecdoteForm = () => {
   )
 }
 
-export default AnecdoteForm
+export default AnecdoteList
