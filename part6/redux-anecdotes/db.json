@@ -18,7 +18,7 @@
     {
       "content": "Any fool can write code that a computer can understand. Good programmers write code that humans can understand.",
       "id": "36975",
-      "votes": 3
+      "votes": 4
     },
     {
       "content": "Premature optimization is the root of all evil.",
@@ -32,13 +32,18 @@
     },
     {
       "content": "test",
-      "votes": 6,
+      "votes": 14,
       "id": "84arpfm"
     },
     {
       "content": "hi",
-      "votes": 10,
+      "votes": 25,
       "id": "vEKbgYn"
+    },
+    {
+      "content": "From connect react redux",
+      "votes": 4,
+      "id": "f8ckRz2"
     }
   ]
 }

@@ -1,13 +1,12 @@
 import React from 'react'
-import { useDispatch } from 'react-redux'
+import { connect } from 'react-redux'
 import { filter } from '../reducers/filterReducer'
 
-const Filter = () => {
-  const dispatch = useDispatch(filter)
+const Filter = (props) => {
   const handleChange = (event) => {
     event.preventDefault()
     const query = event.target.value
-    dispatch(filter(query))
+    props.filter(query)
   }
 
   const style = {
@@ -21,4 +20,13 @@ const Filter = () => {
   )
 }
 
-export default Filter
+const mapDispatchToProps = {
+  filter
+}
+
+const connectedFilter = connect(
+  null,
+  mapDispatchToProps
+)(Filter)
+
+export default connectedFilter
