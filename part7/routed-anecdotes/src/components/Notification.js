@@ -11,7 +11,6 @@ const Notification = ({message}) => {
     display: 'none'
   }
   const theStyle = message ? style:notVisible
-  console.log(theStyle)
   return (
     <div style={theStyle}>
       {message} created
