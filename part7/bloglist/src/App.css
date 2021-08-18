@@ -1,0 +1,16 @@
+.error, .success{
+  background-color:gainsboro;
+  border-radius: 6px;
+  width: auto;
+  padding: 5px 20px;
+}
+
+.error {
+  color: red;
+  border:2px solid red;
+}
+
+.success{
+  color: green;
+  border:2px solid green;
+}
