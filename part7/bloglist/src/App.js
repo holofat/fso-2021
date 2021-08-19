@@ -8,6 +8,9 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import './App.css'
 
+import {showNotification} from './reducers/notificationReducer'
+import { useDispatch } from 'react-redux'
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [newTitle, setNewTitle] = useState('')
@@ -17,8 +20,8 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [newToken, setNewToken] = useState('')
-  const [message, setMessage] = useState(null)
-  const [error, setError] = useState(false)
+
+  const dispatch = useDispatch()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -46,20 +49,12 @@ const App = () => {
         'loggedBlogUser', JSON.stringify(user)
       )
       setNewToken(user['token'])
-      setMessage(`Hello, ${user.username}`)
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      dispatch(showNotification(`Hello, ${user.username}`, false))
       setUser(user)
       setUsername('')
       setPassword('')
     } catch (exception) {
-      setError(true)
-      setMessage('Wrong username or password')
-      setTimeout(() => {
-        setMessage(null)
-        setError(false)
-      }, 5000)
+      dispatch(showNotification('Wrong username or password', true))
       console.log('Wrong Credentials')
     }
   }
@@ -78,10 +73,7 @@ const App = () => {
       await blogService.create(newBlog, newToken)
       const blogList = await blogService.getAll()
       setBlogs(blogList)
-      setMessage(`${newBlog.title} by ${newBlog.author} is added`)
-      setTimeout(() => {
-        setMessage(null)
-      }, 6000)
+      dispatch(showNotification(`${newBlog.title} by ${newBlog.author} is added`, false))
     } catch (exception) {
       console.log(exception)
     }
@@ -97,12 +89,7 @@ const App = () => {
     if(window.confirm(`Do you want to remove blog ${blog.title} by ${blog.author}?`)) {
       try {
         await blogService.deleteBlog(blog.id, blog.user)
-        setError(true)
-        setMessage(`${blog.title} is deleted`)
-        setTimeout(() => {
-          setMessage(null)
-          setError(false)
-        }, 3000)
+        dispatch(showNotification(`${blog.title} is deleted`, true))
         setBlogs(blogs.filter(aBlog => aBlog.id !== blog.id))
       } catch (e){
         console.log(e)
@@ -116,7 +103,7 @@ const App = () => {
   const loginForm = () => (
     <div>
       <h1>Log in to Blog</h1>
-      <Notification message={message} error={error}/>
+      <Notification/>
       <LoginForm  password={password} handleUsername={({target}) => setUsername(target.value)} handlePassword={({target}) => setPassword(target.value)} handleLogin={handleLogin} />
     </div>
   )
@@ -126,7 +113,7 @@ const App = () => {
     return (
       <div>
         <h1>Blogs</h1>
-        <Notification message={message} error={error}/>
+        <Notification/>
         <p>
           {user.username} logged in <button id="#logout-button" type="submit" onClick={() => handleLogout()} value="logout">logout</button>
         </p>
