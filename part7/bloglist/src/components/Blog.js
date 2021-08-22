@@ -1,7 +1,11 @@
 import blogService from '../services/blogs'
 import React, { useState } from 'react'
 
+import { addLike } from '../reducers/blogReducer'
+import { useDispatch } from 'react-redux'
+
 const Blog = ({blog, handleDelete, user}) => {
+  const dispatch = useDispatch()
   const [visible, setVisible] = useState(false)
   const [countLike, setCountLike] = useState(blog.likes)
 
@@ -12,7 +16,7 @@ const Blog = ({blog, handleDelete, user}) => {
     setVisible(!visible)
   }
 
-  const addLike = async (e) => {
+  const liked = async (e) => {
     e.preventDefault()
     const blogObject = {
       title: blog.title,
@@ -23,7 +27,7 @@ const Blog = ({blog, handleDelete, user}) => {
       likes: countLike+1
     }
     try {
-      await blogService.addLike(blogObject)
+      dispatch(addLike(blogObject))
       setCountLike(countLike+1)
     } catch (e) {
       console.log(e)
@@ -39,7 +43,7 @@ const Blog = ({blog, handleDelete, user}) => {
         </div>
       )
     } else {
-      return(<div></div>)
+      return null
     }
   }
 
@@ -53,7 +57,7 @@ const Blog = ({blog, handleDelete, user}) => {
   return (
     <div style={blogStyle} className='blog'>
       <p id="title"><b>{blog.title}</b> {blog.author} </p>
-      <button id="like-button" className="likeButton" type="button" onClick={addLike}>Like</button>
+      <button id="like-button" className="likeButton" type="button" onClick={liked}>Like</button>
       <button id="show-detail" style={hideWhenVisible} onClick={toggleVisibility}>view</button>
       <button style={showWhenVisible} onClick={toggleVisibility}>hide</button>
       <div className="togglableContent" style={showWhenVisible}>

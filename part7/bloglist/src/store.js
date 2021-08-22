@@ -3,15 +3,14 @@ import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
 
 import notificationReducer from './reducers/notificationReducer'
-import togglableReducer from './reducers/togglableReducer'
-
-
+import blogReducer from './reducers/blogReducer'
+import userReducer from './reducers/userReducer'
 
 
 const reducer = combineReducers({
   notification: notificationReducer,
-  togglable: togglableReducer,
-
+  blog: blogReducer,
+  user: userReducer
 })
 
 const store = createStore(
@@ -20,6 +19,7 @@ const store = createStore(
     applyMiddleware(thunk)
   )
 )
+
 
 
 export default store

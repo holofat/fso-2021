@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import {connect} from 'react-redux'
 
 const Togglable = (props) => {
   const [visible, setVisible] = useState(false)
@@ -24,15 +23,4 @@ const Togglable = (props) => {
   )
 }
 
-const mapDispatchToProps = (state) => {
-  return {
-    togglable: state.togglable
-  }
-}
-
-const connectedTogglable = connect(
-  null,
-  mapDispatchToProps
-)(Togglable)
-
-export default connectedTogglable
+export default Togglable
